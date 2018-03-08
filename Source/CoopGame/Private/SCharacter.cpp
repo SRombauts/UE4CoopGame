@@ -16,7 +16,7 @@ ASCharacter::ASCharacter()
 	SpringArmComponent->bUsePawnControlRotation = true;
 // 	SpringArmComponent->RelativeRotation = FRotator(-45.f, 0.f, 0.f); // No visible effect on the arm itself
 //	SpringArmComponent->TargetArmLength = 300.0f;
-//	SpringArmComponent->bEnableCameraLag = true;
+	SpringArmComponent->bEnableCameraLag = true;
 //	SpringArmComponent->CameraLagSpeed = 3.0f;
 	SpringArmComponent->SetupAttachment(RootComponent);
 
