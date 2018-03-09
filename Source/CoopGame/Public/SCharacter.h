@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "SCharacter.generated.h"
 
+/**
+ * Third Person player character
+ */
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter
 {
