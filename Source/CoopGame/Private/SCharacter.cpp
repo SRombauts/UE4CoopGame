@@ -14,7 +14,7 @@ ASCharacter::ASCharacter()
 
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
 	SpringArmComponent->bUsePawnControlRotation = true;
-	SpringArmComponent->SocketOffset = FVector(0.f, 20.f, 78.f); // At the height of Character's eyes, just a bit to the right to better see
+	SpringArmComponent->SocketOffset = FVector(0.f, 40.f, 78.f); // At the height of Character's eyes, just a bit to the right to better see
 //	SpringArmComponent->TargetArmLength = 300.0f; // Default is 300.0f;
 	SpringArmComponent->bEnableCameraLag = true;
 //	SpringArmComponent->CameraLagSpeed = 3.0f; // Default is 10.0f
