@@ -6,6 +6,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
 
 // Sets default values
 ASWeapon::ASWeapon()
@@ -33,6 +35,8 @@ void ASWeapon::Fire()
 		Owner->GetActorEyesViewPoint(TraceStart, ViewpointOrientation);
 		const FVector ShotDirection = ViewpointOrientation.Vector();
 		const FVector TraceEnd = TraceStart + ShotDirection * 10000.f;
+		
+		FVector TracerEndPoint = TraceEnd;
 
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActor(Owner);
@@ -51,22 +55,26 @@ void ASWeapon::Fire()
 			if (HitPawn && BloodEffect)
 			{
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
-				DrawDebugLine(GetWorld(), TraceStart, HitResult.Location, FColor::Red, false, 5.0f, 0, 1.f);
 			}
 			else if (ImpactEffect)
 			{
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
-				DrawDebugLine(GetWorld(), TraceStart, HitResult.Location, FColor::Green, false, 1.0f, 0, 1.f);
 			}
-		}
-		else
-		{
-			DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::White, false, 1.0f, 0, 1.f);
+
+			TracerEndPoint = HitResult.ImpactPoint;
 		}
 
 		if (MuzzleEffect)
 		{
 			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, SkeletalMeshComponent, MuzzleSocketName);
+		}
+
+		if (TracerEffect)
+		{
+			const FVector MuzzleLocation = SkeletalMeshComponent->GetSocketLocation(MuzzleSocketName);
+
+			UParticleSystemComponent* ParticleSystemComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TracerEffect, MuzzleLocation);
+			ParticleSystemComponent->SetVectorParameter(TracerTargetName, TracerEndPoint);
 		}
 	}
 }
