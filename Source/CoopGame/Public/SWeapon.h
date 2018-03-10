@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "SWeapon.generated.h"
 
+/**
+ * Weapon attached to the right-hand socket of our Character's Skeletal Mesh
+ */
 UCLASS()
 class COOPGAME_API ASWeapon : public AActor
 {

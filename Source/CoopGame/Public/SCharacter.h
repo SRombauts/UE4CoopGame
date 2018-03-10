@@ -7,7 +7,7 @@
 #include "SCharacter.generated.h"
 
 /**
- * Third Person player character
+ * Third Person player Character with an appropriate Skeletal Mesh, Animations, Intpu Bindings...
  */
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter
@@ -32,11 +32,14 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class USpringArmComponent* SpringArmComponent;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+
+	/** @return	Pawn's eye location */
+	virtual FVector GetPawnViewLocation() const override;
 };

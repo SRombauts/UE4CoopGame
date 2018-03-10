@@ -14,14 +14,14 @@ ASCharacter::ASCharacter()
 
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
 	SpringArmComponent->bUsePawnControlRotation = true;
-// 	SpringArmComponent->RelativeRotation = FRotator(-45.f, 0.f, 0.f); // No visible effect on the arm itself
-//	SpringArmComponent->TargetArmLength = 300.0f;
+	SpringArmComponent->SocketOffset = FVector(0.f, 0.f, 78.f); // At the height of Character's eyes
+//	SpringArmComponent->TargetArmLength = 300.0f; // Default is 300.0f;
 	SpringArmComponent->bEnableCameraLag = true;
-//	SpringArmComponent->CameraLagSpeed = 3.0f;
+//	SpringArmComponent->CameraLagSpeed = 3.0f; // Default is 10.0f
 	SpringArmComponent->SetupAttachment(RootComponent);
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
-	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName); // attaching to the socket is not needed
+	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName); // attaching to the socket does not seems to be needed anymore
 
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 }
@@ -78,3 +78,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Released, this, &ASCharacter::StopJumping);
 }
 
+FVector ASCharacter::GetPawnViewLocation() const
+{
+	return CameraComponent ? CameraComponent->GetComponentLocation() : Super::GetPawnViewLocation();
+}

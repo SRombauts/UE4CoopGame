@@ -18,7 +18,7 @@ void ASWeapon::Fire()
 	AActor* Owner = GetOwner();
 	if (World && Owner)
 	{
-		// Trace the world from pawn eyes toward crosshair direction
+		// Trace the world from pawn point of view (camera) toward crosshair direction
 		FVector TraceStart;
 		FRotator ViewpointOrientation;
 		Owner->GetActorEyesViewPoint(TraceStart, ViewpointOrientation);
