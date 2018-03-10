@@ -3,6 +3,7 @@
 #include "SWeapon.h"
 
 #include "Components/SkeletalMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 
 // Sets default values
@@ -12,17 +13,25 @@ ASWeapon::ASWeapon()
 	RootComponent = SkeletalMeshComponent;
 }
 
+// Called when the game starts or when spawned
+void ASWeapon::BeginPlay()
+{
+	Super::BeginPlay();
+
+}
+
 void ASWeapon::Fire()
 {
 	UWorld* World = GetWorld();
 	AActor* Owner = GetOwner();
 	if (World && Owner)
 	{
-		// Trace the world from pawn point of view (camera) toward crosshair direction
+		// Hit-Scan Weapon: Trace the world from our Pawn point of view (camera) toward crosshair direction
 		FVector TraceStart;
 		FRotator ViewpointOrientation;
 		Owner->GetActorEyesViewPoint(TraceStart, ViewpointOrientation);
-		const FVector TraceEnd = TraceStart + ViewpointOrientation.Vector() * 10000.f;
+		const FVector ShotDirection = ViewpointOrientation.Vector();
+		const FVector TraceEnd = TraceStart + ShotDirection * 10000.f;
 
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActor(Owner);
@@ -35,14 +44,12 @@ void ASWeapon::Fire()
 		{
 			DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Green, false, 1.f, 0, 1.f);
 
-			// TODO: blocking hit, process damages
+			// Blocking hit, process damages
+			AActor* HitActor = HitResult.GetActor();
+			if (HitActor)
+			{
+				UGameplayStatics::ApplyPointDamage(HitActor, 20.f, ShotDirection, HitResult, Owner->GetInstigatorController(), this, DamageTypeClass);
+			}
 		}
 	}
-}
-
-// Called when the game starts or when spawned
-void ASWeapon::BeginPlay()
-{
-	Super::BeginPlay();
-	
 }

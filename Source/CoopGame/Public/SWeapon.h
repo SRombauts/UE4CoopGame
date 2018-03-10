@@ -18,13 +18,16 @@ public:
 	// Sets default values for this actor's properties
 	ASWeapon();
 
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void Fire();
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class USkeletalMeshComponent* SkeletalMeshComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	TSubclassOf<UDamageType> DamageTypeClass;
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void Fire();
 };
