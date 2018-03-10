@@ -46,7 +46,18 @@ void ASWeapon::Fire()
 			// Blocking hit, process damages
 			AActor* HitActor = HitResult.GetActor();
 			UGameplayStatics::ApplyPointDamage(HitActor, 20.f, ShotDirection, HitResult, Owner->GetInstigatorController(), this, DamageTypeClass);
-			DrawDebugLine(GetWorld(), TraceStart, HitResult.Location, FColor::Red, false, 5.0f, 0, 1.f);
+
+			APawn* HitPawn = Cast<APawn>(HitActor);
+			if (HitPawn && BloodEffect)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
+				DrawDebugLine(GetWorld(), TraceStart, HitResult.Location, FColor::Red, false, 5.0f, 0, 1.f);
+			}
+			else if (ImpactEffect)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
+				DrawDebugLine(GetWorld(), TraceStart, HitResult.Location, FColor::Green, false, 1.0f, 0, 1.f);
+			}
 		}
 		else
 		{

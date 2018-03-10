@@ -31,6 +31,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
 	class UParticleSystem* MuzzleEffect;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
+	class UParticleSystem* ImpactEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
+	class UParticleSystem* BloodEffect;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TSubclassOf<UDamageType> DamageTypeClass;
 
