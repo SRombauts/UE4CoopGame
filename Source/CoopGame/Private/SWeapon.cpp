@@ -25,6 +25,8 @@ void ASWeapon::BeginPlay()
 
 void ASWeapon::Fire()
 {
+	UGameplayStatics::PlaySound2D(GetWorld(), ShotSound);
+
 	UWorld* World = GetWorld();
 	AActor* Owner = GetOwner();
 	if (World && Owner)
@@ -52,11 +54,11 @@ void ASWeapon::Fire()
 			UGameplayStatics::ApplyPointDamage(HitActor, 20.f, ShotDirection, HitResult, Owner->GetInstigatorController(), this, DamageTypeClass);
 
 			APawn* HitPawn = Cast<APawn>(HitActor);
-			if (HitPawn && BloodEffect)
+			if (HitPawn)
 			{
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
 			}
-			else if (ImpactEffect)
+			else
 			{
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
 			}
@@ -64,16 +66,12 @@ void ASWeapon::Fire()
 			TracerEndPoint = HitResult.ImpactPoint;
 		}
 
-		if (MuzzleEffect)
-		{
-			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, SkeletalMeshComponent, MuzzleSocketName);
-		}
+		UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, SkeletalMeshComponent, MuzzleSocketName);
 
-		if (TracerEffect)
+		const FVector MuzzleLocation = SkeletalMeshComponent->GetSocketLocation(MuzzleSocketName);
+		UParticleSystemComponent* ParticleSystemComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TracerEffect, MuzzleLocation);
+		if (ParticleSystemComponent)
 		{
-			const FVector MuzzleLocation = SkeletalMeshComponent->GetSocketLocation(MuzzleSocketName);
-
-			UParticleSystemComponent* ParticleSystemComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TracerEffect, MuzzleLocation);
 			ParticleSystemComponent->SetVectorParameter(TracerTargetName, TracerEndPoint);
 		}
 	}

@@ -46,6 +46,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TSubclassOf<UDamageType> DamageTypeClass;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Sounds")
+	USoundBase* ShotSound;
+
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void Fire();
 };
