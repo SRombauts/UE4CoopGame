@@ -42,14 +42,14 @@ void ASWeapon::Fire()
 		const bool bHit = World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, QueryParams);
 		if (bHit)
 		{
-			DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Green, false, 1.f, 0, 1.f);
-
 			// Blocking hit, process damages
 			AActor* HitActor = HitResult.GetActor();
-			if (HitActor)
-			{
-				UGameplayStatics::ApplyPointDamage(HitActor, 20.f, ShotDirection, HitResult, Owner->GetInstigatorController(), this, DamageTypeClass);
-			}
+			UGameplayStatics::ApplyPointDamage(HitActor, 20.f, ShotDirection, HitResult, Owner->GetInstigatorController(), this, DamageTypeClass);
+			DrawDebugLine(GetWorld(), TraceStart, HitResult.Location, FColor::Red, false, 5.0f, 0, 1.f);
+		}
+		else
+		{
+			DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::White, false, 1.0f, 0, 1.f);
 		}
 	}
 }
