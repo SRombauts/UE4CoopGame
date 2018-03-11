@@ -25,11 +25,8 @@ void ASWeapon::BeginPlay()
 
 void ASWeapon::Fire()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), ShotSound);
-
-	UWorld* World = GetWorld();
 	AActor* Owner = GetOwner();
-	if (World && Owner)
+	if (Owner)
 	{
 		// Hit-Scan Weapon: Trace the world from our Pawn point of view (camera) toward crosshair direction
 		FVector TraceStart;
@@ -46,7 +43,7 @@ void ASWeapon::Fire()
 		QueryParams.bTraceComplex = true;
 
 		FHitResult HitResult;
-		const bool bHit = World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, QueryParams);
+		const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, QueryParams);
 		if (bHit)
 		{
 			// Blocking hit, process damages
@@ -66,13 +63,22 @@ void ASWeapon::Fire()
 			TracerEndPoint = HitResult.ImpactPoint;
 		}
 
+		// Muzzle Particle Effect
 		UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, SkeletalMeshComponent, MuzzleSocketName);
 
+		// Fog tracer Particle Effect
 		const FVector MuzzleLocation = SkeletalMeshComponent->GetSocketLocation(MuzzleSocketName);
 		UParticleSystemComponent* ParticleSystemComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TracerEffect, MuzzleLocation);
 		if (ParticleSystemComponent)
 		{
 			ParticleSystemComponent->SetVectorParameter(TracerTargetName, TracerEndPoint);
 		}
+
+		// Gunshot sound
+		UGameplayStatics::PlaySound2D(GetWorld(), ShotSound);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ASWeapon::Fire: No Owner set. Please set owning Pawn when equipping this weapon."));
 	}
 }
