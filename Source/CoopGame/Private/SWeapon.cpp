@@ -9,6 +9,13 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 
+static int32 DrawDebugWeapon = 0;
+FAutoConsoleVariableRef CVAR_COOPDebugWeapons(
+	TEXT("COOP.DrawDebugWeapon"),
+	DrawDebugWeapon,
+	TEXT("Draw Debug Line for Weapons"),
+	ECVF_Cheat);
+
 // Sets default values
 ASWeapon::ASWeapon()
 {
@@ -62,6 +69,8 @@ void ASWeapon::Fire()
 
 			TracerEndPoint = HitResult.ImpactPoint;
 		}
+
+		if (DrawDebugWeapon) DrawDebugLine(GetWorld(), TraceStart, TracerEndPoint, bHit ? FColor::Red : FColor::White, false, bHit ? 5.f : 1.f, 0, 1.f);
 
 		// Muzzle Particle Effect
 		UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, SkeletalMeshComponent, MuzzleSocketName);
