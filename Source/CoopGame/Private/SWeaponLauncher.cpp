@@ -19,7 +19,10 @@ void ASWeaponLauncher::Fire()
 		if (GrenadeClass)
 		{
 			FVector MuzzleLocation = SkeletalMeshComponent->GetSocketLocation(MuzzleSocketName);
-			FRotator MuzzleRotation = SkeletalMeshComponent->GetSocketRotation(MuzzleSocketName);
+		//	FRotator MuzzleRotation = SkeletalMeshComponent->GetSocketRotation(MuzzleSocketName); // NOTE: this has a fixed zero Pitch for now, use ViewpointOrientation instead
+			FVector ViewpointLocation;
+			FRotator ViewpointOrientation;
+			OwningPawn->GetActorEyesViewPoint(ViewpointLocation, ViewpointOrientation);
 
 			// Set Spawn Collision Handling Override
 			FActorSpawnParameters ActorSpawnParams;
@@ -27,7 +30,7 @@ void ASWeaponLauncher::Fire()
 			ActorSpawnParams.Instigator = OwningPawn; // required to associate the projectile to the Pawn
 
 			// Spawn a Grenade
-			GetWorld()->SpawnActor<ASGrenade>(GrenadeClass, MuzzleLocation, MuzzleRotation);
+			GetWorld()->SpawnActor<ASGrenade>(GrenadeClass, MuzzleLocation, ViewpointOrientation, ActorSpawnParams);
 
 			// Muzzle Particle Effect
 			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, SkeletalMeshComponent, MuzzleSocketName);
