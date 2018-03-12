@@ -28,6 +28,10 @@ ASGrenade::ASGrenade()
 	ProjectileMovementComponent->bShouldBounce = true;
 	ProjectileMovementComponent->bForceSubStepping = true;
 
+	FuzeTime = 0.5f;
+	ExplosionDamage = 100.f;
+	ExplosionRadius = 500.f;
+
 	SetReplicates(true);
 	SetReplicateMovement(true);
 }

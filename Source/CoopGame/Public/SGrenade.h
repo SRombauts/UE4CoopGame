@@ -39,13 +39,13 @@ protected:
 	USoundBase* ExplosionSound;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
-	float FuzeTime = 0.5f;
-	
+	float FuzeTime;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
-	float ExplosionDamage = 100.f;
-	
+	float ExplosionDamage;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
-	float ExplosionRadius = 500.f;
+	float ExplosionRadius;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
 	TSubclassOf<UDamageType> DamageTypeClass;
