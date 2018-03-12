@@ -2,6 +2,8 @@
 
 #include "SCharacter.h"
 
+#include "SWeapon.h"
+
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
@@ -35,6 +37,15 @@ void ASCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	DefaultFOV = CameraComponent->FieldOfView;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = this;
+	CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(WeaponClass, SpawnParams);
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
+	}
 }
 
 void ASCharacter::MoveForward(float Value)
@@ -67,6 +78,13 @@ void ASCharacter::EndAimDownSight()
 	bAimDownSight = false;
 }
 
+void ASCharacter::Fire()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->Fire();
+	}
+}
 
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
@@ -101,7 +119,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("AimDownSight", EInputEvent::IE_Pressed, this, &ASCharacter::BeginAimDownSight);
 	PlayerInputComponent->BindAction("AimDownSight", EInputEvent::IE_Released, this, &ASCharacter::EndAimDownSight);
 
-//	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &ASCharacter::Fire);
+	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &ASCharacter::Fire);
 }
 
 FVector ASCharacter::GetPawnViewLocation() const

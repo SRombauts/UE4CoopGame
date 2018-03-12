@@ -25,12 +25,12 @@ void ASWeaponLauncher::Fire()
 			OwningPawn->GetActorEyesViewPoint(ViewpointLocation, ViewpointOrientation);
 
 			// Set Spawn Collision Handling Override
-			FActorSpawnParameters ActorSpawnParams;
-			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-			ActorSpawnParams.Instigator = OwningPawn; // required to associate the projectile to the Pawn
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+			SpawnParams.Instigator = OwningPawn; // required to associate the projectile to the Pawn
 
 			// Spawn a Grenade
-			GetWorld()->SpawnActor<ASGrenade>(GrenadeClass, MuzzleLocation, ViewpointOrientation, ActorSpawnParams);
+			GetWorld()->SpawnActor<ASGrenade>(GrenadeClass, MuzzleLocation, ViewpointOrientation, SpawnParams);
 
 			// Muzzle Particle Effect
 			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, SkeletalMeshComponent, MuzzleSocketName);

@@ -24,6 +24,7 @@ protected:
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+
 	void BeginCrouch();
 	void EndCrouch();
 	void BeginAimDownSight();
@@ -35,15 +36,25 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class USpringArmComponent* SpringArmComponent;
 
-	UPROPERTY(EditDefaultsOnly, Category = "FOV", Meta = (ClampMin = 10, ClampMax = 90))
+	UPROPERTY(EditDefaultsOnly, Category = "Player", Meta = (ClampMin = 10, ClampMax = 90))
 	float AimDownSightFOV;
 
-	UPROPERTY(EditDefaultsOnly, Category = "FOV", Meta = (ClampMin = 1.f, ClampMax = 100.f))
+	UPROPERTY(EditDefaultsOnly, Category = "Player", Meta = (ClampMin = 1.f, ClampMax = 100.f))
 	float AimDownSightSpeed;
 
 	float DefaultFOV;
 
 	bool bAimDownSight = false;
+
+	class ASWeapon* CurrentWeapon;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	TSubclassOf<ASWeapon> WeaponClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	FName WeaponSocketName;
+
+	void Fire();
 
 public:	
 	// Called every frame

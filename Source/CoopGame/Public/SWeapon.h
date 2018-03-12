@@ -49,6 +49,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sounds")
 	USoundBase* ShotSound;
 
+public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual void Fire();
+
+	void PlayFireEffects(const FVector& EndPoint);
 };

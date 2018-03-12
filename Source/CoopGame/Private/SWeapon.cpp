@@ -72,22 +72,27 @@ void ASWeapon::Fire()
 
 		if (DrawDebugWeapon) DrawDebugLine(GetWorld(), TraceStart, TracerEndPoint, bHit ? FColor::Red : FColor::White, false, bHit ? 5.f : 1.f, 0, 1.f);
 
-		// Muzzle Particle Effect
-		UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, SkeletalMeshComponent, MuzzleSocketName);
-
-		// Fog tracer Particle Effect
-		const FVector MuzzleLocation = SkeletalMeshComponent->GetSocketLocation(MuzzleSocketName);
-		UParticleSystemComponent* ParticleSystemComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TracerEffect, MuzzleLocation);
-		if (ParticleSystemComponent)
-		{
-			ParticleSystemComponent->SetVectorParameter(TracerTargetName, TracerEndPoint);
-		}
-
-		// Gunshot sound
-		UGameplayStatics::PlaySound2D(GetWorld(), ShotSound);
+		PlayFireEffects(TracerEndPoint);
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ASWeapon::Fire: No Owner set. Please set owning Pawn when equipping this weapon."));
 	}
+}
+
+void ASWeapon::PlayFireEffects(const FVector& EndPoint)
+{
+	// Muzzle Particle Effect
+	UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, SkeletalMeshComponent, MuzzleSocketName);
+
+	// Fog tracer Particle Effect
+	const FVector MuzzleLocation = SkeletalMeshComponent->GetSocketLocation(MuzzleSocketName);
+	UParticleSystemComponent* ParticleSystemComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TracerEffect, MuzzleLocation);
+	if (ParticleSystemComponent)
+	{
+		ParticleSystemComponent->SetVectorParameter(TracerTargetName, EndPoint);
+	}
+
+	// Gunshot sound
+	UGameplayStatics::PlaySound2D(GetWorld(), ShotSound);
 }
