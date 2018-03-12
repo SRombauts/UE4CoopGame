@@ -24,6 +24,9 @@ ASCharacter::ASCharacter()
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName); // attaching to the socket does not seems to be needed anymore
 
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
+
+	AimDownSightFOV = 60.f;
+	AimDownSightSpeed = 20.f;
 }
 
 // Called when the game starts or when spawned
@@ -31,6 +34,7 @@ void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	DefaultFOV = CameraComponent->FieldOfView;
 }
 
 void ASCharacter::MoveForward(float Value)
@@ -53,11 +57,28 @@ void ASCharacter::EndCrouch()
 	UnCrouch();
 }
 
+void ASCharacter::BeginAimDownSight()
+{
+	bAimDownSight = true;
+}
+
+void ASCharacter::EndAimDownSight()
+{
+	bAimDownSight = false;
+}
+
+
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	const float CurrentFOV = CameraComponent->FieldOfView;
+	const float TargetFOV = bAimDownSight ? AimDownSightFOV : DefaultFOV;
+
+	const float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, DeltaTime, AimDownSightSpeed);
+
+	CameraComponent->SetFieldOfView(NewFOV);
 }
 
 // Called to bind functionality to input
@@ -76,6 +97,11 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ASCharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Released, this, &ASCharacter::StopJumping);
+
+	PlayerInputComponent->BindAction("AimDownSight", EInputEvent::IE_Pressed, this, &ASCharacter::BeginAimDownSight);
+	PlayerInputComponent->BindAction("AimDownSight", EInputEvent::IE_Released, this, &ASCharacter::EndAimDownSight);
+
+//	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &ASCharacter::Fire);
 }
 
 FVector ASCharacter::GetPawnViewLocation() const

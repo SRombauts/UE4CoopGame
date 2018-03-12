@@ -26,12 +26,24 @@ protected:
 	void MoveRight(float Value);
 	void BeginCrouch();
 	void EndCrouch();
+	void BeginAimDownSight();
+	void EndAimDownSight();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UCameraComponent* CameraComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class USpringArmComponent* SpringArmComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "FOV", Meta = (ClampMin = 10, ClampMax = 90))
+	float AimDownSightFOV;
+
+	UPROPERTY(EditDefaultsOnly, Category = "FOV", Meta = (ClampMin = 1.f, ClampMax = 100.f))
+	float AimDownSightSpeed;
+
+	float DefaultFOV;
+
+	bool bAimDownSight = false;
 
 public:	
 	// Called every frame
