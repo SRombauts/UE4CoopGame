@@ -59,7 +59,7 @@ void ASWeapon::Fire()
 		QueryParams.bReturnPhysicalMaterial = true;
 
 		FHitResult HitResult;
-		const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, QueryParams);
+		const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, COLLISION_WEAPON, QueryParams);
 		if (bHit)
 		{
 			// Blocking hit, process damages

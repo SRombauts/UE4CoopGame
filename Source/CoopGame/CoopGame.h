@@ -10,3 +10,5 @@
 // + PhysicalSurfaces = (Type = SurfaceType2, Name = "FleshVulnerable")
 #define SURFACE_FLESH_DEFAULT			EPhysicalSurface::SurfaceType1
 #define SURFACE_FLESH_VULNERABLE		EPhysicalSurface::SurfaceType2
+
+#define COLLISION_WEAPON				ECollisionChannel::ECC_GameTraceChannel1
