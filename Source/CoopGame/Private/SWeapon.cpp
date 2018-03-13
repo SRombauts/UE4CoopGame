@@ -2,12 +2,15 @@
 
 #include "SWeapon.h"
 
+#include "CoopGame.h"
+
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 #include "GameFramework/Pawn.h"
 
 static int32 DrawDebugWeapon = 0;
@@ -22,6 +25,9 @@ ASWeapon::ASWeapon()
 {
 	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshComponent"));
 	RootComponent = SkeletalMeshComponent;
+
+	DefaultDamage = 20.f;
+	HighDamage = 80.f;
 }
 
 // Called when the game starts or when spawned
@@ -44,34 +50,41 @@ void ASWeapon::Fire()
 		const FVector TraceEnd = TraceStart + ShotDirection * 10000.f;
 		
 		FVector TracerEndPoint = TraceEnd;
+		FColor DrawDebugColor = FColor::White;
 
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActor(Owner);
 		QueryParams.AddIgnoredActor(this);
 		QueryParams.bTraceComplex = true;
+		QueryParams.bReturnPhysicalMaterial = true;
 
 		FHitResult HitResult;
 		const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, QueryParams);
 		if (bHit)
 		{
 			// Blocking hit, process damages
-			AActor* HitActor = HitResult.GetActor();
-			UGameplayStatics::ApplyPointDamage(HitActor, 20.f, ShotDirection, HitResult, Owner->GetInstigatorController(), this, DamageTypeClass);
+			const EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
 
-			APawn* HitPawn = Cast<APawn>(HitActor);
-			if (HitPawn)
+			const float Damage = (SURFACE_FLESH_VULNERABLE == SurfaceType) ? HighDamage : DefaultDamage;
+
+			UGameplayStatics::ApplyPointDamage(HitResult.GetActor(), Damage, ShotDirection, HitResult, Owner->GetInstigatorController(), this, DamageTypeClass);
+
+			UParticleSystem* HitEffect = ImpactEffect;
+			if ((SURFACE_FLESH_DEFAULT == SurfaceType) || (SURFACE_FLESH_VULNERABLE == SurfaceType))
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
+				HitEffect = BloodEffect;
+				DrawDebugColor = (SURFACE_FLESH_VULNERABLE == SurfaceType) ? FColor::Red : FColor::Orange;
 			}
 			else
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
+				DrawDebugColor = FColor::Green;
 			}
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
 
 			TracerEndPoint = HitResult.ImpactPoint;
 		}
 
-		if (DrawDebugWeapon) DrawDebugLine(GetWorld(), TraceStart, TracerEndPoint, bHit ? FColor::Red : FColor::White, false, bHit ? 5.f : 1.f, 0, 1.f);
+		if (DrawDebugWeapon) DrawDebugLine(GetWorld(), TraceStart, TracerEndPoint, DrawDebugColor, false, bHit ? 5.f : 1.f, 0, 1.f);
 
 		PlayFireEffects(TracerEndPoint);
 
