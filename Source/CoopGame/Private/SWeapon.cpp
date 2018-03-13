@@ -8,6 +8,7 @@
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "GameFramework/Pawn.h"
 
 static int32 DrawDebugWeapon = 0;
 FAutoConsoleVariableRef CVAR_COOPDebugWeapons(
@@ -73,6 +74,8 @@ void ASWeapon::Fire()
 		if (DrawDebugWeapon) DrawDebugLine(GetWorld(), TraceStart, TracerEndPoint, bHit ? FColor::Red : FColor::White, false, bHit ? 5.f : 1.f, 0, 1.f);
 
 		PlayFireEffects(TracerEndPoint);
+
+		// TODO: we should add some recoil, with some additional (random) Pitch and a bit of Yaw
 	}
 	else
 	{
@@ -95,4 +98,15 @@ void ASWeapon::PlayFireEffects(const FVector& EndPoint)
 
 	// Gunshot sound
 	UGameplayStatics::PlaySound2D(GetWorld(), ShotSound);
+
+	// Camera Shake
+	APawn* Owner = Cast<APawn>(GetOwner());
+	if (Owner)
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(Owner->GetController());
+		if (PlayerController)
+		{
+			PlayerController->ClientPlayCameraShake(FireCameraShake);
+		}
+	}
 }
