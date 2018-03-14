@@ -43,6 +43,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
 	class UParticleSystem* BloodEffect;
 
+	/** Time between shots in seconds */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	float TimeBetweenShots;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	float DefaultDamage;
 
@@ -58,9 +62,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sounds")
 	USoundBase* ShotSound;
 
-public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual void Fire();
+
+private:
+	float LastFireTime = 0.f;
+	FTimerHandle TimerHandle_AutoFire;
+
+public:
+	void StartFire();
+	void EndFire();
 
 	void PlayFireEffects(const FVector& EndPoint);
 };

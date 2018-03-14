@@ -78,11 +78,19 @@ void ASCharacter::EndAimDownSight()
 	bAimDownSight = false;
 }
 
-void ASCharacter::Fire()
+void ASCharacter::StartFire()
 {
 	if (CurrentWeapon)
 	{
-		CurrentWeapon->Fire();
+		CurrentWeapon->StartFire();
+	}
+}
+
+void ASCharacter::EndFire()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->EndFire();
 	}
 }
 
@@ -119,7 +127,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("AimDownSight", EInputEvent::IE_Pressed, this, &ASCharacter::BeginAimDownSight);
 	PlayerInputComponent->BindAction("AimDownSight", EInputEvent::IE_Released, this, &ASCharacter::EndAimDownSight);
 
-	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &ASCharacter::Fire);
+	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &ASCharacter::StartFire);
+	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &ASCharacter::EndFire);
 }
 
 FVector ASCharacter::GetPawnViewLocation() const

@@ -12,6 +12,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "GameFramework/Pawn.h"
+#include "TimerManager.h"
 
 static int32 DrawDebugWeapon = 0;
 FAutoConsoleVariableRef CVAR_COOPDebugWeapons(
@@ -28,6 +29,8 @@ ASWeapon::ASWeapon()
 
 	DefaultDamage = 20.f;
 	HighDamage = 80.f;
+
+	TimeBetweenShots = .15f;
 }
 
 // Called when the game starts or when spawned
@@ -37,8 +40,22 @@ void ASWeapon::BeginPlay()
 
 }
 
+void ASWeapon::StartFire()
+{
+	const bool bDoLoop = true;
+	const float FirstDelay = FMath::Max((LastFireTime - GetWorld()->TimeSeconds + TimeBetweenShots), 0.f);
+	GetWorldTimerManager().SetTimer(TimerHandle_AutoFire, this, &ASWeapon::Fire, TimeBetweenShots, bDoLoop, FirstDelay);
+}
+
+void ASWeapon::EndFire()
+{
+	GetWorldTimerManager().ClearTimer(TimerHandle_AutoFire);
+}
+
 void ASWeapon::Fire()
 {
+	LastFireTime = GetWorld()->TimeSeconds;
+
 	AActor* Owner = GetOwner();
 	if (Owner)
 	{

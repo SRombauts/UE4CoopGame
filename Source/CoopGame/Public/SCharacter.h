@@ -30,6 +30,9 @@ protected:
 	void BeginAimDownSight();
 	void EndAimDownSight();
 
+	void StartFire();
+	void EndFire();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UCameraComponent* CameraComponent;
 
@@ -53,8 +56,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	FName WeaponSocketName;
-
-	void Fire();
 
 public:	
 	// Called every frame
