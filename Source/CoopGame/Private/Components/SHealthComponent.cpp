@@ -25,13 +25,13 @@ void USHealthComponent::BeginPlay()
 
 void USHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
-	if (Damage > 0.f)
+	if ((Health > 0.f) && (Damage > 0.f))
 	{
 		// Update Health clamped
 	//	Health = FMath::Clamp(Health - Damage, 0.f, InitialHealth);
 		Health = FMath::Max(Health - Damage, 0.f);
 
-		UE_LOG(LogTemp, Log, TEXT("Health changed: %f (%s)"), Health, *FString::SanitizeFloat(Health));
+		UE_LOG(LogTemp, Log, TEXT("Health changed: %s"), *FString::SanitizeFloat(Health));
 
 		OnHealthChangedEvent.Broadcast(this, Health, Damage, DamageType, InstigatedBy, DamageCauser);
 	}

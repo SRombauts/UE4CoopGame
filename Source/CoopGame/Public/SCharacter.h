@@ -39,6 +39,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class USpringArmComponent* SpringArmComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class USHealthComponent* HealthComponent;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Player", Meta = (ClampMin = 10, ClampMax = 90))
 	float AimDownSightFOV;
 
@@ -56,6 +59,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	FName WeaponSocketName;
+
+	UFUNCTION()
+	void OnHealthChangedEvent(class USHealthComponent* HealthComp, float Health, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
+	bool bDied = false;
 
 public:	
 	// Called every frame
