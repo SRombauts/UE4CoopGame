@@ -5,6 +5,7 @@
 #include "CoopGame.h"
 
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Particles/ParticleSystem.h"
@@ -27,17 +28,22 @@ ASWeapon::ASWeapon()
 	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshComponent"));
 	RootComponent = SkeletalMeshComponent;
 
+	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComp"));
+	WidgetComponent->SetupAttachment(RootComponent, VisorSocketName);
+
 	DefaultDamage = 20.f;
 	HighDamage = 80.f;
 
 	TimeBetweenShots = .15f;
+
+	InitialAmmunitions = 30;
+	Ammunitions = InitialAmmunitions;
 }
 
 // Called when the game starts or when spawned
 void ASWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 void ASWeapon::StartFire()
@@ -54,58 +60,64 @@ void ASWeapon::EndFire()
 
 void ASWeapon::Fire()
 {
-	LastFireTime = GetWorld()->TimeSeconds;
-
 	AActor* Owner = GetOwner();
 	if (Owner)
 	{
-		// Hit-Scan Weapon: Trace the world from our Pawn point of view (camera) toward crosshair direction
-		FVector TraceStart;
-		FRotator ViewpointOrientation;
-		Owner->GetActorEyesViewPoint(TraceStart, ViewpointOrientation);
-		const FVector ShotDirection = ViewpointOrientation.Vector();
-		const FVector TraceEnd = TraceStart + ShotDirection * 10000.f;
-		
-		FVector TracerEndPoint = TraceEnd;
-		FColor DrawDebugColor = FColor::White;
-
-		FCollisionQueryParams QueryParams;
-		QueryParams.AddIgnoredActor(Owner);
-		QueryParams.AddIgnoredActor(this);
-		QueryParams.bTraceComplex = true;
-		QueryParams.bReturnPhysicalMaterial = true;
-
-		FHitResult HitResult;
-		const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, COLLISION_WEAPON, QueryParams);
-		if (bHit)
+		if (Ammunitions > 0)
 		{
-			// Blocking hit, process damages
-			const EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
+			--Ammunitions;
+			OnAmmunitionsChangedEvent.Broadcast(Ammunitions);
 
-			const float Damage = (SURFACE_FLESH_VULNERABLE == SurfaceType) ? HighDamage : DefaultDamage;
+			LastFireTime = GetWorld()->TimeSeconds;
 
-			UGameplayStatics::ApplyPointDamage(HitResult.GetActor(), Damage, ShotDirection, HitResult, Owner->GetInstigatorController(), this, DamageTypeClass);
+			// Hit-Scan Weapon: Trace the world from our Pawn point of view (camera) toward crosshair direction
+			FVector TraceStart;
+			FRotator ViewpointOrientation;
+			Owner->GetActorEyesViewPoint(TraceStart, ViewpointOrientation);
+			const FVector ShotDirection = ViewpointOrientation.Vector();
+			const FVector TraceEnd = TraceStart + ShotDirection * 10000.f;
 
-			UParticleSystem* HitEffect = ImpactEffect;
-			if ((SURFACE_FLESH_DEFAULT == SurfaceType) || (SURFACE_FLESH_VULNERABLE == SurfaceType))
+			FVector TracerEndPoint = TraceEnd;
+			FColor DrawDebugColor = FColor::White;
+
+			FCollisionQueryParams QueryParams;
+			QueryParams.AddIgnoredActor(Owner);
+			QueryParams.AddIgnoredActor(this);
+			QueryParams.bTraceComplex = true;
+			QueryParams.bReturnPhysicalMaterial = true;
+
+			FHitResult HitResult;
+			const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, COLLISION_WEAPON, QueryParams);
+			if (bHit)
 			{
-				HitEffect = BloodEffect;
-				DrawDebugColor = (SURFACE_FLESH_VULNERABLE == SurfaceType) ? FColor::Red : FColor::Orange;
-			}
-			else
-			{
-				DrawDebugColor = FColor::Green;
-			}
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
+				// Blocking hit, process damages
+				const EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
 
-			TracerEndPoint = HitResult.ImpactPoint;
+				const float Damage = (SURFACE_FLESH_VULNERABLE == SurfaceType) ? HighDamage : DefaultDamage;
+
+				UGameplayStatics::ApplyPointDamage(HitResult.GetActor(), Damage, ShotDirection, HitResult, Owner->GetInstigatorController(), this, DamageTypeClass);
+
+				UParticleSystem* HitEffect = ImpactEffect;
+				if ((SURFACE_FLESH_DEFAULT == SurfaceType) || (SURFACE_FLESH_VULNERABLE == SurfaceType))
+				{
+					HitEffect = BloodEffect;
+					DrawDebugColor = (SURFACE_FLESH_VULNERABLE == SurfaceType) ? FColor::Red : FColor::Orange;
+				}
+				else
+				{
+					DrawDebugColor = FColor::Green;
+				}
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
+
+				TracerEndPoint = HitResult.ImpactPoint;
+			}
+
+			if (DrawDebugWeapon) DrawDebugLine(GetWorld(), TraceStart, TracerEndPoint, DrawDebugColor, false, bHit ? 5.f : 1.f, 0, 1.f);
+
+			PlayFireEffects(TracerEndPoint);
+
+			// TODO: we should add some recoil, with some additional (random) Pitch and a bit of Yaw
 		}
-
-		if (DrawDebugWeapon) DrawDebugLine(GetWorld(), TraceStart, TracerEndPoint, DrawDebugColor, false, bHit ? 5.f : 1.f, 0, 1.f);
-
-		PlayFireEffects(TracerEndPoint);
-
-		// TODO: we should add some recoil, with some additional (random) Pitch and a bit of Yaw
 	}
 	else
 	{
