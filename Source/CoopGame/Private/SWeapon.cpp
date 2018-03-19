@@ -35,6 +35,7 @@ ASWeapon::ASWeapon()
 	HighDamage = 80.f;
 
 	TimeBetweenShots = .15f;
+	ReloadTime = 2.5f;
 
 	InitialAmmunitions = 30;
 	Ammunitions = InitialAmmunitions;
@@ -151,4 +152,21 @@ void ASWeapon::PlayFireEffects(const FVector& EndPoint)
 			PlayerController->ClientPlayCameraShake(FireCameraShake);
 		}
 	}
+}
+
+void ASWeapon::Reload()
+{
+	FTimerHandle TimerHandle_Reload;
+	GetWorldTimerManager().SetTimer(TimerHandle_Reload, this, &ASWeapon::ReloadDone, ReloadTime);
+
+	Ammunitions = 0;
+	OnAmmunitionsChangedEvent.Broadcast(Ammunitions);
+}
+
+void ASWeapon::ReloadDone()
+{
+	Ammunitions = InitialAmmunitions;
+	OnAmmunitionsChangedEvent.Broadcast(Ammunitions);
+
+	LastFireTime = GetWorld()->TimeSeconds - TimeBetweenShots;
 }

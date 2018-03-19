@@ -33,6 +33,8 @@ protected:
 	void StartFire();
 	void EndFire();
 
+	void Reload();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UCameraComponent* CameraComponent;
 

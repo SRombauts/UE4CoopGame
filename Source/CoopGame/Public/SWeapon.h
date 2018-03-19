@@ -59,6 +59,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	float TimeBetweenShots;
 
+	// Reload time in seconds
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	float ReloadTime;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	float DefaultDamage;
 
@@ -92,6 +96,9 @@ private:
 public:
 	void StartFire();
 	void EndFire();
+
+	void Reload();
+	void ReloadDone();
 
 	void PlayFireEffects(const FVector& EndPoint);
 

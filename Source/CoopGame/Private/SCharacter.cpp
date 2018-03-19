@@ -118,6 +118,14 @@ void ASCharacter::EndFire()
 	}
 }
 
+void ASCharacter::Reload()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->Reload();
+	}
+}
+
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
@@ -153,6 +161,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &ASCharacter::StartFire);
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &ASCharacter::EndFire);
+
+	PlayerInputComponent->BindAction("Reload", EInputEvent::IE_Pressed, this, &ASCharacter::Reload);
 }
 
 FVector ASCharacter::GetPawnViewLocation() const
