@@ -28,11 +28,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class USkeletalMeshComponent* SkeletalMeshComponent;
 
+	// UMG BP UI to display the ammunitions count next to the holographic visor
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UWidgetComponent* WidgetComponent;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
-	class UParticleSystem* MuzzleEffect;
 
 	// Name of the Rifle Muzzle Socket to display exhaust gas on fire
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
@@ -42,18 +40,32 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	FName VisorSocketName;
 
-	// Name of the FX parameter to set the location of the endpoint
+	// Name of the socket at the ammunition magazine, for shell ejection
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	FName MagazineSocketName;
+
+	// Name of the Fog Tracer FX parameter "BeamEnd" to set the location of the endpoint
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	FName TracerTargetName;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
+	class UParticleSystem* MuzzleEffect;
+
+	// Fog effect on the bullet's trajectory
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
 	class UParticleSystem* TracerEffect;
 
+	// Default particle effect of the bullet's impact on hard surfaces
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
 	class UParticleSystem* ImpactEffect;
 
+	// Blood-splat on bullet's penetration on flesh
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
 	class UParticleSystem* BloodEffect;
+
+	// Effect to display on ejection of bullet's shell on each fire
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
+	class UParticleSystem* ShellEjectEffect;
 
 	// Time between shots in seconds
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")

@@ -39,6 +39,11 @@ ASWeapon::ASWeapon()
 
 	InitialAmmunitions = 30;
 	Ammunitions = InitialAmmunitions;
+
+	MuzzleSocketName = TEXT("MuzzleFlashSocket");
+	VisorSocketName = TEXT("HoloVisorSocket");
+	MagazineSocketName = TEXT("MagazineSocket");
+	TracerTargetName = TEXT("BeamEnd");
 }
 
 // Called when the game starts or when spawned
@@ -138,6 +143,10 @@ void ASWeapon::PlayFireEffects(const FVector& EndPoint)
 	{
 		ParticleSystemComponent->SetVectorParameter(TracerTargetName, EndPoint);
 	}
+
+	// Bullet's shell ejection
+	const FVector MagazineLocation = SkeletalMeshComponent->GetSocketLocation(MagazineSocketName);
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ShellEjectEffect, MagazineLocation);
 
 	// Gunshot sound
 	UGameplayStatics::PlaySound2D(GetWorld(), ShotSound);
