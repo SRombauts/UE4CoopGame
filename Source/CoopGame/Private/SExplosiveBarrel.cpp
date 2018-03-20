@@ -12,6 +12,7 @@ ASExplosiveBarrel::ASExplosiveBarrel()
 {
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	MeshComponent->SetSimulatePhysics(true);
+	MeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
 	RootComponent = MeshComponent;
 
 	// Use a sphere as a simple explosion area effect representation
@@ -40,8 +41,9 @@ void ASExplosiveBarrel::OnHealthChangedEvent(USHealthComponent* HealthComp, floa
 {
 	if (Health <= 0.f)
 	{
-		// Die!
-		UE_LOG(LogTemp, Log, TEXT("Die!"));
+		// Explode!
+		bExploded = true;
+		UE_LOG(LogTemp, Log, TEXT("Explode!"));
 
 		// Switch material from red to black
 		MeshComponent->SetMaterial(0, ExplodedMaterial);
@@ -55,6 +57,7 @@ void ASExplosiveBarrel::OnHealthChangedEvent(USHealthComponent* HealthComp, floa
 		MeshComponent->AddImpulse(ImpulseVector);
 
 		// Add Radial force to repulse physics enabled actors
+		// TODO Replace with a RadialComponent!
 		TArray<UPrimitiveComponent*> ComponentsToRepulse;
 		RepulseComponent->GetOverlappingComponents(ComponentsToRepulse);
 		for (auto& ComponentToRepulse : ComponentsToRepulse)
@@ -65,5 +68,7 @@ void ASExplosiveBarrel::OnHealthChangedEvent(USHealthComponent* HealthComp, floa
 				ComponentToRepulse->AddRadialForce(GetActorLocation(), RepulseComponent->GetScaledSphereRadius(), RepulseForce, ERadialImpulseFalloff::RIF_Linear, bAccelChange);
 			}
 		}
+
+		// TODO: Apply Radial damage (to explode other barrels)
 	}
 }

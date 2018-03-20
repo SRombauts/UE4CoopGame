@@ -56,12 +56,11 @@ void ASCharacter::BeginPlay()
 
 void ASCharacter::OnHealthChangedEvent(USHealthComponent* HealthComp, float Health, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
-	if ((Health <= 0.f) && !bDied)
+	if (Health <= 0.f)
 	{
 		// Die!
 		bDied = true;
-
-		UE_LOG(LogTemp, Log, TEXT("Died!"));
+		UE_LOG(LogTemp, Log, TEXT("Die!"));
 
 		GetMovementComponent()->StopMovementImmediately();
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
