@@ -4,18 +4,18 @@
 
 #include "CoopGame.h"
 
+#include "DrawDebugHelpers.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
+#include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
-#include "DrawDebugHelpers.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "Engine/SkeletalMeshSocket.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
-#include "GameFramework/Pawn.h"
 #include "TimerManager.h"
 
-static int32 DrawDebugWeapon = 0;
+int32 DrawDebugWeapon = 0;
 FAutoConsoleVariableRef CVAR_COOPDebugWeapons(
 	TEXT("COOP.DrawDebugWeapon"),
 	DrawDebugWeapon,
@@ -44,6 +44,8 @@ ASWeapon::ASWeapon()
 	VisorSocketName = TEXT("HoloVisorSocket");
 	MagazineSocketName = TEXT("MagazineSocket");
 	TracerTargetName = TEXT("BeamEnd");
+
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned

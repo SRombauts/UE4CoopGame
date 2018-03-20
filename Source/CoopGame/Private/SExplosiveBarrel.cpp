@@ -2,31 +2,41 @@
 
 #include "SExplosiveBarrel.h"
 
-#include "Components/SphereComponent.h"
 #include "Components/SHealthComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "PhysicsEngine/RadialForceComponent.h"
+
+extern int32 DrawDebugWeapon; // Defined in SWeapon.cpp
 
 // Sets default values
 ASExplosiveBarrel::ASExplosiveBarrel()
 {
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	MeshComponent->SetSimulatePhysics(true);
-	MeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
+	MeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody); // Let RadialForceComponent affect us (ie another barrel explode neaaby)
 	RootComponent = MeshComponent;
 
 	// Use a sphere as a simple explosion area effect representation
-	RepulseComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RadialForceComponent"));
-	RepulseComponent->SetSphereRadius(600);
-	RepulseComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	RepulseComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	RepulseComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_PhysicsBody, ECollisionResponse::ECR_Overlap); // collision filters : only IsSimulatingPhysics() components
-	RepulseComponent->SetupAttachment(RootComponent);
+	RadialForceComponent = CreateDefaultSubobject<URadialForceComponent>(TEXT("RadialForceComponent"));
+	RadialForceComponent->Radius = 400;
+	RadialForceComponent->Falloff = ERadialImpulseFalloff::RIF_Linear;
+	RadialForceComponent->ImpulseStrength = 50000.f;
+//	RadialForceComponent->ForceStrength;
+//	RadialForceComponent->DestructibleDamage;
+	RadialForceComponent->bAutoActivate = false; // Prevent radial force to apply on every Tick, use FireImpulse() instead
+	RadialForceComponent->bIgnoreOwningActor = true;
+	RadialForceComponent->SetupAttachment(RootComponent);
 
 	HealthComponent = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComponent"));
 
 	VerticalImpulse = 50000.f;
-	RepulseForce = 50000.f;
+	ExplosionDamage = 150.f;
+	ExplosionRadius = 400.f;
+
+	SetReplicates(true);
+	SetReplicateMovement(true);
 }
 
 // Called when the game starts or when spawned
@@ -56,19 +66,14 @@ void ASExplosiveBarrel::OnHealthChangedEvent(USHealthComponent* HealthComp, floa
 		const FVector ImpulseVector = FVector::UpVector * VerticalImpulse;
 		MeshComponent->AddImpulse(ImpulseVector);
 
-		// Add Radial force to repulse physics enabled actors
-		// TODO Replace with a RadialComponent!
-		TArray<UPrimitiveComponent*> ComponentsToRepulse;
-		RepulseComponent->GetOverlappingComponents(ComponentsToRepulse);
-		for (auto& ComponentToRepulse : ComponentsToRepulse)
-		{
-			if (ComponentToRepulse && ComponentToRepulse->IsSimulatingPhysics()) // NOTE: this is redundant with the collision filters we have applied
-			{
-				const bool bAccelChange = true; // If true, Force is taken as a change in acceleration instead of a physical force (i.e. mass will have no affect).
-				ComponentToRepulse->AddRadialForce(GetActorLocation(), RepulseComponent->GetScaledSphereRadius(), RepulseForce, ERadialImpulseFalloff::RIF_Linear, bAccelChange);
-			}
-		}
+		// Blasts away physics enabled actors
+		// TODO NOCOMMIT: crash!
+		RadialForceComponent->FireImpulse();
 
-		// TODO: Apply Radial damage (to explode other barrels)
+		// Apply Explosion damage
+		AController* Controller = Instigator ? Instigator->GetInstigatorController() : nullptr;
+		const bool bDamageApplied = UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadius, DamageTypeClass, TArray<AActor*>(), this, Controller);
+		UE_LOG(LogTemp, Log, TEXT("ASExplosiveBarrel::OnExplosion: bDamageApplied=%d"), bDamageApplied);
+		if (DrawDebugWeapon) DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 16, bDamageApplied ? FColor::Red : FColor::Green, false, 1.f, 0, 1.f);
 	}
 }

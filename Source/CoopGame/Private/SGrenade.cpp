@@ -2,12 +2,14 @@
 
 #include "SGrenade.h"
 
-#include "GameFramework/ProjectileMovementComponent.h"
-#include "GameFramework/Pawn.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+
+extern int32 DrawDebugWeapon; // Defined in SWeapon.cpp
 
 // Sets default values
 ASGrenade::ASGrenade()
@@ -55,7 +57,7 @@ void ASGrenade::OnExplosion()
 	AController* Controller = Instigator ? Instigator->GetInstigatorController() : nullptr;
 	const bool bDamageApplied = UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadius, DamageTypeClass, TArray<AActor*>(), this, Controller);
 	UE_LOG(LogTemp, Log, TEXT("ASGrenade::OnExplosion: bDamageApplied=%d"), bDamageApplied);
-	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 16, bDamageApplied?FColor::Red:FColor::Green, false, 1.f, 0, 1.f);
+	if (DrawDebugWeapon) DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 16, bDamageApplied?FColor::Red:FColor::Green, false, 1.f, 0, 1.f);
 
 	if (Role == ENetRole::ROLE_Authority)
 	{

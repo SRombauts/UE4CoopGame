@@ -3,12 +3,12 @@
 #include "SCharacter.h"
 
 #include "SWeapon.h"
-#include "Components/SHealthComponent.h"
 
 #include "Camera/CameraComponent.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "GameFramework/PawnMovementComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SHealthComponent.h"
+#include "GameFramework/PawnMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
