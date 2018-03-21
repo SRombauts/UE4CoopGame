@@ -9,6 +9,7 @@
 #include "Components/SHealthComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -42,13 +43,16 @@ void ASCharacter::BeginPlay()
 	
 	DefaultFOV = CameraComponent->FieldOfView;
 
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.Instigator = this;
-	CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(WeaponClass, SpawnParams);
-	if (CurrentWeapon)
+	if (Role == ROLE_Authority)
 	{
-		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = this;
+		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(WeaponClass, SpawnParams);
+		if (CurrentWeapon)
+		{
+			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
+		}
 	}
 
 	HealthComponent->OnHealthChangedEvent.AddDynamic(this, &ASCharacter::OnHealthChangedEvent);
@@ -167,4 +171,12 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 FVector ASCharacter::GetPawnViewLocation() const
 {
 	return CameraComponent ? CameraComponent->GetComponentLocation() : Super::GetPawnViewLocation();
+}
+
+void ASCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASCharacter, CurrentWeapon);
+//	DOREPLIFETIME_CONDITION(ASCharacter, bIsCarryingObjective, COND_OwnerOnly); // Optimization
 }

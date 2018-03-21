@@ -54,6 +54,7 @@ protected:
 
 	bool bAimDownSight = false;
 
+	UPROPERTY(Replicated)
 	class ASWeapon* CurrentWeapon;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
