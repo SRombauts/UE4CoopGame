@@ -9,6 +9,20 @@
 // OnAmmunitionsChangedEvent
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmunitionsChangedSignature, int32, Ammunitions);
 
+// Contains information about a single hitscan weapon line trace
+USTRUCT()
+struct FHitScanTrace
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	TEnumAsByte<EPhysicalSurface> SurfaceType;
+
+	UPROPERTY()
+	FVector_NetQuantize TraceTo;
+};
+
 /**
  * Weapon attached to the right-hand socket of our Character's Skeletal Mesh
  */
@@ -101,6 +115,9 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual void Fire();
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerFire();
+
 private:
 	float LastFireTime = 0.f;
 	FTimerHandle TimerHandle_AutoFire;
@@ -113,6 +130,13 @@ public:
 	void ReloadDone();
 
 	void PlayFireEffects(const FVector& EndPoint);
+	void PlayImpactEffects(EPhysicalSurface SurfaceType, FVector ImpactPoint);
+
+	UPROPERTY(ReplicatedUsing=OnRep_HitScanTrace)
+	FHitScanTrace HitScanTrace;
+
+	UFUNCTION()
+	void OnRep_HitScanTrace();
 
 public:
 	// Called when the ammunition count changes

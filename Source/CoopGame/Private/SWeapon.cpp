@@ -10,6 +10,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
@@ -46,6 +47,7 @@ ASWeapon::ASWeapon()
 	TracerTargetName = TEXT("BeamEnd");
 
 	SetReplicates(true);
+	MinNetUpdateFrequency = 33.f;
 }
 
 // Called when the game starts or when spawned
@@ -68,6 +70,13 @@ void ASWeapon::EndFire()
 
 void ASWeapon::Fire()
 {
+	if (Role != ROLE_Authority)
+	{
+		// Fire, replicate and apply damage on the server
+		ServerFire();
+	}
+
+	// Do the following on the client owner as well so that there is a minimal amount of latency when firing
 	AActor* Owner = GetOwner();
 	if (Owner)
 	{
@@ -100,24 +109,27 @@ void ASWeapon::Fire()
 			{
 				// Blocking hit, process damages
 				const EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
-
-				const float Damage = (SURFACE_FLESH_VULNERABLE == SurfaceType) ? HighDamage : DefaultDamage;
-
-				UGameplayStatics::ApplyPointDamage(HitResult.GetActor(), Damage, ShotDirection, HitResult, Owner->GetInstigatorController(), this, DamageTypeClass);
-
-				UParticleSystem* HitEffect = ImpactEffect;
-				if ((SURFACE_FLESH_DEFAULT == SurfaceType) || (SURFACE_FLESH_VULNERABLE == SurfaceType))
-				{
-					HitEffect = BloodEffect;
-					DrawDebugColor = (SURFACE_FLESH_VULNERABLE == SurfaceType) ? FColor::Red : FColor::Orange;
-				}
-				else
-				{
-					DrawDebugColor = FColor::Green;
-				}
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
-
+				DrawDebugColor = FColor::Red;
 				TracerEndPoint = HitResult.ImpactPoint;
+
+				PlayImpactEffects(SurfaceType, HitResult.ImpactPoint);
+
+				if (Role == ROLE_Authority)
+				{
+					const float Damage = (SURFACE_FLESH_VULNERABLE == SurfaceType) ? HighDamage : DefaultDamage;
+					UGameplayStatics::ApplyPointDamage(HitResult.GetActor(), Damage, ShotDirection, HitResult, Owner->GetInstigatorController(), this, DamageTypeClass);
+
+					HitScanTrace.TraceTo = HitResult.ImpactPoint;
+					HitScanTrace.SurfaceType = SurfaceType;
+				}
+			}
+			else
+			{
+				if (Role == ROLE_Authority)
+				{
+					HitScanTrace.TraceTo = TracerEndPoint;
+					HitScanTrace.SurfaceType = SurfaceType_Default;
+				}
 			}
 
 			if (DrawDebugWeapon) DrawDebugLine(GetWorld(), TraceStart, TracerEndPoint, DrawDebugColor, false, bHit ? 5.f : 1.f, 0, 1.f);
@@ -131,6 +143,23 @@ void ASWeapon::Fire()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ASWeapon::Fire: No Owner set. Please set owning Pawn when equipping this weapon."));
 	}
+}
+
+void ASWeapon::OnRep_HitScanTrace()
+{
+	// Play cosmetic effects
+	PlayFireEffects(HitScanTrace.TraceTo);
+	PlayImpactEffects(HitScanTrace.SurfaceType, HitScanTrace.TraceTo);
+}
+
+void ASWeapon::ServerFire_Implementation() // Replicated
+{
+	Fire();
+}
+
+bool ASWeapon::ServerFire_Validate() // WithValidation
+{
+	return true;
 }
 
 void ASWeapon::PlayFireEffects(const FVector& EndPoint)
@@ -165,6 +194,17 @@ void ASWeapon::PlayFireEffects(const FVector& EndPoint)
 	}
 }
 
+void ASWeapon::PlayImpactEffects(EPhysicalSurface SurfaceType, FVector ImpactPoint)
+{
+	UParticleSystem* HitEffect = ImpactEffect;
+	if ((SURFACE_FLESH_DEFAULT == SurfaceType) || (SURFACE_FLESH_VULNERABLE == SurfaceType))
+	{
+		HitEffect = BloodEffect;
+	}
+	const FVector MuzzleLocation = SkeletalMeshComponent->GetSocketLocation(MuzzleSocketName);
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, ImpactPoint, (ImpactPoint - MuzzleLocation).Rotation());
+}
+
 void ASWeapon::Reload()
 {
 	FTimerHandle TimerHandle_Reload;
@@ -180,4 +220,11 @@ void ASWeapon::ReloadDone()
 	OnAmmunitionsChangedEvent.Broadcast(Ammunitions);
 
 	LastFireTime = GetWorld()->TimeSeconds - TimeBetweenShots;
+}
+
+void ASWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(ASWeapon, HitScanTrace, COND_SkipOwner); // Optimization
 }
