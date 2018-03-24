@@ -50,25 +50,18 @@ void ASExplosiveBarrel::BeginPlay()
 
 void ASExplosiveBarrel::OnHealthChangedEvent(USHealthComponent* HealthComp, float Health, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
+	// The following only runs on the Server, since damage & health event binding are only if (Role == ROLE_Authority)
 	if (Health <= 0.f)
 	{
-		// Explode!
+		// Explode! Replicated to play cosmetic effects on clients
 		bExploded = true;
 		UE_LOG(LogTemp, Log, TEXT("Explode!"));
-
-		// Switch material from red to black
-		MeshComponent->SetMaterial(0, ExplodedMaterial);
-
-		// Explosion Particle Effect and Sound
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
-		UGameplayStatics::PlaySound2D(GetWorld(), ExplosionSound);
 
 		// Launch the barrel upward
 		const FVector ImpulseVector = FVector::UpVector * VerticalImpulse;
 		MeshComponent->AddImpulse(ImpulseVector);
 
 		// Blasts away physics enabled actors
-		// TODO NOCOMMIT: crash!
 		RadialForceComponent->FireImpulse();
 
 		// Apply Explosion damage
@@ -77,6 +70,16 @@ void ASExplosiveBarrel::OnHealthChangedEvent(USHealthComponent* HealthComp, floa
 		UE_LOG(LogTemp, Log, TEXT("ASExplosiveBarrel::OnExplosion: bDamageApplied=%d"), bDamageApplied);
 		if (DrawDebugWeapon) DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 16, bDamageApplied ? FColor::Red : FColor::Green, false, 1.f, 0, 1.f);
 	}
+}
+
+void ASExplosiveBarrel::OnRep_Exploded()
+{
+	// Switch material from red to black
+	MeshComponent->SetMaterial(0, ExplodedMaterial);
+
+	// Explosion Particle Effect and Sound
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
+	UGameplayStatics::PlaySound2D(GetWorld(), ExplosionSound);
 }
 
 void ASExplosiveBarrel::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const

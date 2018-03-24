@@ -147,7 +147,7 @@ void ASWeapon::Fire()
 
 void ASWeapon::OnRep_HitScanTrace()
 {
-	// Play cosmetic effects
+	// Play cosmetic effects on other clients
 	PlayFireEffects(HitScanTrace.TraceTo);
 	PlayImpactEffects(HitScanTrace.SurfaceType, HitScanTrace.TraceTo);
 }

@@ -60,6 +60,7 @@ void ASCharacter::BeginPlay()
 
 void ASCharacter::OnHealthChangedEvent(USHealthComponent* HealthComp, float Health, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
+	// The following only runs on the Server, since damage & health event binding are only if (Role == ROLE_Authority)
 	if (Health <= 0.f)
 	{
 		// Die!
