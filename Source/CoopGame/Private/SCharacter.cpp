@@ -178,5 +178,5 @@ void ASCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASCharacter, CurrentWeapon);
-//	DOREPLIFETIME_CONDITION(ASCharacter, bIsCarryingObjective, COND_OwnerOnly); // Optimization
+	DOREPLIFETIME(ASCharacter, bDied);
 }

@@ -54,6 +54,6 @@ protected:
 	UFUNCTION()
 	void OnHealthChangedEvent(class USHealthComponent* HealthComp, float Health, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Status")
 	bool bExploded = false;
 };

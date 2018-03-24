@@ -6,6 +6,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 
 extern int32 DrawDebugWeapon; // Defined in SWeapon.cpp
@@ -76,4 +77,11 @@ void ASExplosiveBarrel::OnHealthChangedEvent(USHealthComponent* HealthComp, floa
 		UE_LOG(LogTemp, Log, TEXT("ASExplosiveBarrel::OnExplosion: bDamageApplied=%d"), bDamageApplied);
 		if (DrawDebugWeapon) DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 16, bDamageApplied ? FColor::Red : FColor::Green, false, 1.f, 0, 1.f);
 	}
+}
+
+void ASExplosiveBarrel::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASExplosiveBarrel, bExploded);
 }
