@@ -103,7 +103,7 @@ protected:
 	int32 InitialAmmunitions;
 
 	// Count of currently loaded ammunitions
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Ammunitions")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Ammunitions")
 	int32 Ammunitions;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")

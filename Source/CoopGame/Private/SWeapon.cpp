@@ -226,5 +226,6 @@ void ASWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetim
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME_CONDITION(ASWeapon, HitScanTrace, COND_SkipOwner); // Optimization
+	DOREPLIFETIME_CONDITION(ASWeapon, Ammunitions, COND_SkipOwner);
+	DOREPLIFETIME_CONDITION(ASWeapon, HitScanTrace, COND_SkipOwner);
 }
