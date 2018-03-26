@@ -36,11 +36,11 @@ ASCharacter::ASCharacter()
 	AimDownSightSpeed = 20.f;
 }
 
-// Called when the game starts or when spawned
-void ASCharacter::BeginPlay()
+// Called when an instance of this class is placed (in editor) or spawned, after all Blueprint Construction Scripts.
+void ASCharacter::OnConstruction(const FTransform & Transform)
 {
-	Super::BeginPlay();
-	
+	Super::OnConstruction(Transform);
+
 	DefaultFOV = CameraComponent->FieldOfView;
 
 	if (Role == ROLE_Authority)
@@ -54,6 +54,12 @@ void ASCharacter::BeginPlay()
 			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
 		}
 	}
+}
+
+// Called when the game starts or when spawned
+void ASCharacter::BeginPlay()
+{
+	Super::BeginPlay();
 
 	HealthComponent->OnHealthChangedEvent.AddDynamic(this, &ASCharacter::OnHealthChangedEvent);
 }
