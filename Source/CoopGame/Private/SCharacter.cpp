@@ -19,7 +19,8 @@ ASCharacter::ASCharacter()
 
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
 	SpringArmComponent->bUsePawnControlRotation = true;
-	SpringArmComponent->SocketOffset = FVector(0.f, 40.f, 78.f); // At the height of Character's eyes, just a bit to the right to better see
+//	SpringArmComponent->SocketOffset = FVector(0.f, 40.f, 98.f); // This would offset the socket, that is the camera, not the attachment point on the character (which is not nice when the camera get closer)
+	SpringArmComponent->AddLocalOffset(FVector(0.f, 40.f, 98.f)); // This offset the attachment point into the character, so that we see the head when the camera get closer
 	SpringArmComponent->TargetArmLength = 160.0f; // Default is 300.0f;
 	SpringArmComponent->bEnableCameraLag = true;
 //	SpringArmComponent->CameraLagSpeed = 3.0f; // Default is 10.0f
@@ -27,6 +28,7 @@ ASCharacter::ASCharacter()
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName); // attaching to the socket does not seems to be needed anymore
+	CameraComponent->RelativeRotation = FRotator(-10.f, 0.f, 0.f);
 
 	HealthComponent = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComponent"));
 
