@@ -28,7 +28,7 @@ ASCharacter::ASCharacter()
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName); // attaching to the socket does not seems to be needed anymore
-	CameraComponent->RelativeRotation = FRotator(-10.f, 0.f, 0.f);
+//	CameraComponent->RelativeRotation = FRotator(-10.f, 0.f, 0.f); // NOTE: this breaks the way we fire
 
 	HealthComponent = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComponent"));
 
