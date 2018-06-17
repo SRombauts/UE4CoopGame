@@ -22,6 +22,17 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	FVector GetNextPathPoint();
+
+	// Next point in navigation point
+	FVector NextPathPoint;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
+	float Force = 1000.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
+	float PathPointRadius = 60.f;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
