@@ -16,13 +16,26 @@ public:
 	ASTrackerBot();
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UStaticMeshComponent* MeshComponent;
-
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+	void OnHealthChangedEvent(class USHealthComponent* HealthComp, float Health, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
+	// Play cosmetic effects on clients
+	UFUNCTION()
+	void OnRep_Exploded();
+
 	FVector GetNextPathPoint();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UStaticMeshComponent* MeshComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class USHealthComponent* HealthComponent;
 
 	// Next point in navigation point
 	FVector NextPathPoint;
@@ -31,9 +44,8 @@ protected:
 	float Force = 1000.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
-	float PathPointRadius = 60.f;
+	float PathPointRadius = 100.f;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(ReplicatedUsing = OnRep_Exploded, VisibleAnywhere, BlueprintReadOnly, Category = "Status")
+	bool bExploded = false;
 };

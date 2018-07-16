@@ -4,10 +4,12 @@
 
 #include "AI/Navigation/NavigationPath.h"
 #include "AI/Navigation/NavigationSystem.h"
+#include "Components/SHealthComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 int32 DrawDebugNav = 0;
 FAutoConsoleVariableRef CVAR_COOPDebugNav(
@@ -19,7 +21,7 @@ FAutoConsoleVariableRef CVAR_COOPDebugNav(
 // Sets default values
 ASTrackerBot::ASTrackerBot()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+ 	// Set this pawn to call Tick() every frame, as a way to navigate toward the player.
 	PrimaryActorTick.bCanEverTick = true;
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
@@ -27,14 +29,37 @@ ASTrackerBot::ASTrackerBot()
 	MeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody); // Let other physics objects affect us (ie another bot)
 	MeshComponent->SetCanEverAffectNavigation(false);
 	RootComponent = MeshComponent;
+
+	HealthComponent = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComponent"));
+
+	SetReplicates(true);
+	SetReplicateMovement(true);
 }
 
 // Called when the game starts or when spawned
 void ASTrackerBot::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	HealthComponent->OnHealthChangedEvent.AddDynamic(this, &ASTrackerBot::OnHealthChangedEvent);
+
 	NextPathPoint = GetNextPathPoint();
+}
+
+void ASTrackerBot::OnHealthChangedEvent(class USHealthComponent* HealthComp, float Health, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
+{
+	// The following only runs on the Server, since damage & health event binding are only if (Role == ROLE_Authority)
+	if (Health <= 0.f)
+	{
+		// Explode! Replicated to play cosmetic effects on clients
+		bExploded = true;
+		UE_LOG(LogTemp, Log, TEXT("Explode!"));
+	}
+}
+
+void ASTrackerBot::OnRep_Exploded()
+{
+	// TODO Play cosmetic effects on clients
 }
 
 FVector ASTrackerBot::GetNextPathPoint()
@@ -80,8 +105,11 @@ void ASTrackerBot::Tick(float DeltaTime)
 		const bool bAccelChange = true;
 		MeshComponent->AddForce(ForceDirection, NAME_None, bAccelChange);
 	}
-	else
-	{
-		NextPathPoint = GetNextPathPoint();
-	}
+}
+
+void ASTrackerBot::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASTrackerBot, bExploded);
 }
