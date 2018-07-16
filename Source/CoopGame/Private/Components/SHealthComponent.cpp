@@ -9,6 +9,11 @@ USHealthComponent::USHealthComponent()
 {
 	InitialHealth = 100.f;
 
+	// TODO NOCOMMIT TickComponent() to test ticking actors with ticking components
+	PrimaryComponentTick.bCanEverTick = true;
+	// TODO: this is required so that Deactive() do something
+	bAutoActivate = true; 
+
 	SetIsReplicated(true);
 }
 
@@ -27,6 +32,17 @@ void USHealthComponent::BeginPlay()
 		{
 			Owner->OnTakeAnyDamage.AddDynamic(this, &USHealthComponent::OnTakeAnyDamage);
 		}
+	}
+}
+
+void USHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// TODO NOCOMMIT
+	if (GetOwner()->GetName() == TEXT("BP_TrackerBot_2"))
+	{
+		UE_LOG(LogTemp, Log, TEXT("%s %s TickComponent(%f)"), *GetOwner()->GetName(), *GetName(), DeltaTime);
 	}
 }
 

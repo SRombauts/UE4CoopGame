@@ -90,10 +90,24 @@ void ASTrackerBot::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// TODO NOCOMMIT
+	UE_LOG(LogTemp, Log, TEXT("%s Tick(%f)"), *GetName(), DeltaTime);
+
 	if (GetActorLocation().Equals(NextPathPoint, PathPointRadius))
 	{
 		// When near to the next Path Point, find and target the one after it
 		NextPathPoint = GetNextPathPoint();
+
+		// TODO NOCOMMIT test:
+		UE_LOG(LogTemp, Log, TEXT("%s SetActorTickEnabled(false)"), *GetName());
+		SetActorTickEnabled(false);
+		const TSet<UActorComponent*>& components = GetComponents();
+		for (UActorComponent* component : components)
+		{
+			// TODO NOCOMMIT
+			UE_LOG(LogTemp, Log, TEXT("%s Deactivate(%s) (whasActive=%d)"), *GetName(), *component->GetName(), component->bIsActive);
+			component->Deactivate();
+		}
 	}
 	else
 	{
