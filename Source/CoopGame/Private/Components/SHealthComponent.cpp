@@ -11,7 +11,7 @@ USHealthComponent::USHealthComponent()
 
 	// TODO NOCOMMIT TickComponent() to test ticking actors with ticking components
 	PrimaryComponentTick.bCanEverTick = true;
-	// TODO: this is required so that Deactive() do something
+	// TODO: this is required so that Deactivate() actually do something
 	bAutoActivate = true; 
 
 	SetIsReplicated(true);

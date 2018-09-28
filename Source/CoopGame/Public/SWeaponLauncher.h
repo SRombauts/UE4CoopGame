@@ -19,6 +19,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Grenade")
 	TSubclassOf<class ASGrenade> GrenadeClass;
 
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	// Interface ASWeapon
+//	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual void Fire();
 };

@@ -2,8 +2,8 @@
 
 #include "STrackerBot.h"
 
-#include "AI/Navigation/NavigationPath.h"
-#include "AI/Navigation/NavigationSystem.h"
+#include "NavigationPath.h"
+#include "NavigationSystem.h"
 #include "Components/SHealthComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "DrawDebugHelpers.h"
@@ -67,7 +67,7 @@ FVector ASTrackerBot::GetNextPathPoint()
 	APawn* Player = UGameplayStatics::GetPlayerPawn(this, 0);
 	if (Player)
 	{
-		UNavigationPath* Path = UNavigationSystem::FindPathToActorSynchronously(this, GetActorLocation(), Player);
+		UNavigationPath* Path = UNavigationSystemV1::FindPathToActorSynchronously(this, GetActorLocation(), Player);
 		if (Path && Path->PathPoints.Num() > 1)
 		{
 			if (DrawDebugNav)
